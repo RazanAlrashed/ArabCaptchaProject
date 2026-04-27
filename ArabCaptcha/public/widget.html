@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArabCaptcha Widget</title>
+  <link rel="stylesheet" href="widget.css" />
+</head>
+
+<body>
+  <main class="widget-shell">
+    <div class="captcha">
+
+      <!-- Page 1: Initial button -->
+      <div class="cap-page cap-page-1" id="capPage1">
+        <div class="cap-line">
+          <button type="button" class="cap-circle" id="capStartBtn" aria-label="Start captcha"></button>
+          <span class="cap-text">التحقق البشري</span>
+        </div>
+      </div>
+
+      <!-- Page 2: Challenge -->
+      <div class="cap-page cap-page-2 hidden" id="capPage2">
+
+        <div class="cap-head">
+          <!-- Single composite image (ref + low-conf stitched by server) -->
+          <div class="cap-image-composite">
+            <img id="compositeImage" alt="الكلمتان للتحقق" />
+          </div>
+
+          <button class="icon-btn refresh-inline" type="button" id="refreshCaptcha" aria-label="Refresh captcha">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <path d="M21 3v7h-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="cap-sub">اكتب الكلمتين الظاهرتين في الصورة (من اليمين لليسار):</div>
+
+        <div class="cap-fields">
+          <input id="refAnswer"     type="text" placeholder="الكلمة الأولى (يمين)" autocomplete="off" dir="rtl" />
+          <input id="lowConfAnswer" type="text" placeholder="الكلمة الثانية (يسار)" autocomplete="off" dir="rtl" />
+        </div>
+
+        <div class="cap-actions">
+          <button class="secondary" type="button" id="verifyCaptchaBtn">تحقق</button>
+        </div>
+
+        <div class="cap-status" id="captchaStatus" role="status" aria-live="polite"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="widget.js"></script>
+</body>
+
+</html>

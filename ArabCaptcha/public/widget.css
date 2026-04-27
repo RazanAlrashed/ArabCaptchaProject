@@ -1,0 +1,242 @@
+:root {
+  --stroke: rgba(0, 0, 0, 0.08);
+  --text: #2a2a2a;
+  --muted: rgba(0, 0, 0, 0.55);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  direction: rtl;
+}
+
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: transparent;
+  color: var(--text);
+}
+
+.widget-shell {
+  width: 100%;
+  max-width: 420px;
+  margin: auto;
+  padding: 8px;
+}
+
+.captcha {
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.94);
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.captcha::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("assets/ArabCaptcha.png");
+  background-repeat: no-repeat;
+  background-position: center 65%;
+  background-size: 90%;
+  filter: blur(8px);
+  opacity: 0.12;
+  z-index: 0;
+}
+
+.captcha > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ── Page 1 ─────────────────────────────────────────────── */
+.cap-line {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 6px 4px;
+}
+
+.cap-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.70);
+}
+
+.cap-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0.25);
+  background-color: rgba(255, 255, 255, 0.95);
+  background-image: url("assets/ArabCaptcha.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 68%;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.cap-circle:hover {
+  border-color: #6b5f52;
+}
+
+/* ── Page 2 ─────────────────────────────────────────────── */
+.cap-page-2 {
+  margin-top: 8px;
+}
+
+.cap-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* ── Composite image container ───────────────────────────── */
+.cap-image-composite {
+  flex: 1;
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(242, 239, 233, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  overflow: hidden;
+}
+
+.cap-image-composite img {
+  /* Fill width; keep aspect ratio; max height keeps widget compact */
+  width: 100%;
+  max-height: 90px;
+  object-fit: contain;
+  display: block;
+  border-radius: 6px;
+  background: #fff;
+  /* Smooth transition when the image swaps during escalation */
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+  /* Prevent right-click save / drag — minor friction for attackers */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────── */
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+
+.icon-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.refresh-inline {
+  margin-right: auto;
+  flex-shrink: 0;
+}
+
+/* ── Instruction text ────────────────────────────────────── */
+.cap-sub {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+  margin: 10px 0;
+  text-align: right;
+}
+
+/* ── Answer fields ───────────────────────────────────────── */
+.cap-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.cap-fields input {
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.92);
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  text-align: right;
+  direction: rtl;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cap-fields input:focus {
+  border-color: rgba(107, 95, 82, 0.35);
+  box-shadow: 0 0 0 4px rgba(107, 95, 82, 0.12);
+}
+
+.cap-fields input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Verify button ───────────────────────────────────────── */
+.cap-actions {
+  margin-top: 10px;
+}
+
+.secondary {
+  display: block;
+  width: 140px;
+  margin: 0 auto;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(107, 95, 82, 0.25);
+  background: rgba(255, 255, 255, 0.75);
+  color: rgba(0, 0, 0, 0.75);
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.secondary:hover:not(:disabled) {
+  background: #6b5f52;
+  color: #fff;
+  border-color: #6b5f52;
+}
+
+.secondary:active:not(:disabled) {
+  background: #5a5046;
+  color: #fff;
+  border-color: #5a5046;
+  transform: scale(0.97);
+}
+
+.secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Status line ─────────────────────────────────────────── */
+.cap-status {
+  margin-top: 8px;
+  font-size: 12px;
+  min-height: 16px;
+  color: rgba(0, 0, 0, 0.65);
+  text-align: right;
+}

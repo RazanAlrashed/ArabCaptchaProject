@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم ArabCaptcha</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg:#F5F4F0;--surface:#FFFFFF;--surface-2:#EFEDE8;--border:#E2DFDA;
+            --border-strong:#C8C4BC;--text-primary:#1A1917;--text-secondary:#6B6860;
+            --text-muted:#9C9A96;--accent:#1A1917;--accent-fg:#FFFFFF;
+            --green:#2D6A4F;--green-bg:#EBF5F0;--amber:#92400E;--amber-bg:#FEF3C7;
+            --blue:#1E3A8A;--blue-bg:#EFF6FF;--red:#991B1B;--red-bg:#FEF2F2;
+            --radius-sm:6px;--radius-md:10px;--radius-lg:14px;--radius-xl:20px;
+            --shadow-sm:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md:0 4px 12px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.04);
+            --transition:0.18s ease;
+        }
+        body { font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;font-size:14px;line-height:1.6; }
+        .topbar { background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100; }
+        .topbar-brand { display:flex;align-items:center;gap:10px; }
+        .topbar-logo { width:30px;height:30px;background:var(--accent);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:15px; }
+        .topbar-title { font-size:15px;font-weight:600;letter-spacing:-0.01em; }
+        .topbar-subtitle { font-size:12px;color:var(--text-muted);background:var(--surface-2);padding:3px 10px;border-radius:20px;border:1px solid var(--border); }
+        .page { max-width:1100px;margin:0 auto;padding:28px 24px 48px; }
+        .section-label { font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px; }
+        .stats-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px; }
+        .stat-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;display:flex;flex-direction:column;gap:6px; }
+        .stat-icon { font-size:18px;margin-bottom:4px; }
+        .stat-label { font-size:12px;color:var(--text-secondary); }
+        .stat-value { font-size:32px;font-weight:600;line-height:1;letter-spacing:-0.02em; }
+        .stat-card.blue .stat-value{color:var(--blue)} .stat-card.green .stat-value{color:var(--green)} .stat-card.amber .stat-value{color:var(--amber)}
+        .stat-strip { height:3px;border-radius:2px;margin-top:8px;opacity:0.35; }
+        .stat-card.blue .stat-strip{background:var(--blue)} .stat-card.green .stat-strip{background:var(--green)} .stat-card.amber .stat-strip{background:var(--amber)}
+        .card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:16px;overflow:hidden; }
+        .card-header { padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
+        .card-title { font-size:14px;font-weight:500;display:flex;align-items:center;gap:7px; }
+        .card-title span { font-size:16px; }
+        .card-body { padding:20px 22px; }
+        .upload-zone { border:1.5px dashed var(--border-strong);border-radius:var(--radius-md);padding:28px 20px;text-align:center;cursor:pointer;transition:background var(--transition),border-color var(--transition); }
+        .upload-zone:hover { background:var(--surface-2);border-color:var(--accent); }
+        .upload-zone-icon { font-size:24px;margin-bottom:8px;display:block; }
+        .upload-zone-title { font-size:13px;font-weight:500;margin-bottom:3px; }
+        .upload-zone-sub { font-size:12px;color:var(--text-muted); }
+        .upload-file-input { display:none; }
+        .upload-selected { margin-top:10px;font-size:12px;color:var(--text-secondary);display:none; }
+        .upload-actions { display:flex;gap:8px;justify-content:flex-end;margin-top:14px; }
+
+        /* ── OCR Mode Toggle ── */
+        .ocr-mode-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 14px;
+            padding: 10px 14px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .ocr-mode-bar label { color: var(--text-secondary); font-weight: 500; margin-left: 4px; }
+        .toggle-group { display:flex; border:1px solid var(--border-strong); border-radius:var(--radius-sm); overflow:hidden; }
+        .toggle-btn {
+            padding: 6px 14px; font-size: 12px; font-family: inherit;
+            border: none; cursor: pointer; font-weight: 500;
+            background: var(--surface); color: var(--text-secondary);
+            transition: all var(--transition);
+        }
+        .toggle-btn.active { background: var(--accent); color: #fff; }
+        .ocr-mode-hint { font-size: 11px; color: var(--text-muted); margin-right: auto; }
+
+        .btn { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;border:1px solid transparent;transition:all var(--transition);white-space:nowrap; }
+        .btn-dark { background:var(--accent);color:var(--accent-fg);border-color:var(--accent); }
+        .btn-dark:hover { background:#333; }
+        .btn-ghost { background:transparent;color:var(--text-secondary);border-color:var(--border-strong); }
+        .btn-ghost:hover { background:var(--surface-2); }
+        .btn-sm { padding:6px 12px;font-size:12px; }
+        .btn-primary-sm { background:var(--accent);color:#fff;border-color:var(--accent); }
+        .btn-primary-sm:hover { background:#333; }
+        .btn-outline-sm { background:transparent;color:var(--text-secondary);border-color:var(--border-strong); }
+        .btn-outline-sm:hover { background:var(--surface-2); }
+        .btn-success-sm { background:var(--green-bg);color:var(--green);border-color:transparent; }
+        button:disabled { opacity:0.55;cursor:not-allowed; }
+
+        #processingStatus { font-size:12px;color:var(--text-muted);margin-top:10px;min-height:18px;display:flex;align-items:center;gap:6px; }
+        .status-dot { width:6px;height:6px;border-radius:50%;background:var(--amber);animation:pulse 1.2s infinite;display:none; }
+        .status-dot.visible { display:block; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        #resultsArea { display:none;margin-bottom:16px; }
+        #resultsArea.visible { display:block; }
+        .results-header { font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:12px;padding:0 2px; }
+        .words-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px; }
+        .word-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;transition:box-shadow var(--transition),border-color var(--transition); }
+        .word-card:hover { box-shadow:var(--shadow-sm);border-color:var(--border-strong); }
+        .word-img { width:100%;height:72px;object-fit:contain;background:var(--surface-2);display:block;border-bottom:1px solid var(--border); }
+        .word-card-foot { padding:8px;display:flex;flex-direction:column;gap:5px; }
+        .badge { display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px; }
+        .badge-success { background:var(--green-bg);color:var(--green); }
+        .badge-warning { background:var(--amber-bg);color:var(--amber); }
+        .table-wrap { overflow-x:auto; }
+        table { width:100%;border-collapse:collapse;font-size:13px; }
+        thead th { text-align:right;font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;padding:10px 16px;background:var(--surface-2);border-bottom:1px solid var(--border); }
+        tbody td { padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:middle; }
+        tbody tr:last-child td { border-bottom:none; }
+        tbody tr:hover td { background:var(--surface-2); }
+        .word-img-sm { width:72px;height:34px;object-fit:contain;border-radius:var(--radius-sm);background:var(--surface-2);display:block;border:1px solid var(--border); }
+        .date-cell { color:var(--text-muted);font-size:12px; }
+        #cropModal { position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);z-index:1000;display:flex;align-items:center;justify-content:center; }
+        .crop-modal-inner { background:var(--surface);border-radius:var(--radius-lg);padding:20px;max-width:80%;width:100%;box-shadow:var(--shadow-md); }
+        .crop-modal-title { font-size:14px;font-weight:500;margin-bottom:14px; }
+        .crop-modal-actions { margin-top:14px;display:flex;gap:8px;justify-content:flex-end; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+        .fade-in { animation:fadeIn 0.22s ease forwards; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="topbar-brand">
+        <div class="topbar-logo">📊</div>
+        <span class="topbar-title">ArabCaptcha</span>
+    </div>
+    <span class="topbar-subtitle">لوحة البيانات</span>
+</div>
+
+<div class="page">
+
+    <p class="section-label">نظرة عامة</p>
+    <div class="stats-grid">
+        <div class="stat-card blue">
+            <div class="stat-icon">🔤</div>
+            <div class="stat-label">إجمالي الكلمات</div>
+            <div class="stat-value">{{ stats.total }}</div>
+            <div class="stat-strip"></div>
+        </div>
+        <div class="stat-card green">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">كلمات مرجعية (Reference)</div>
+            <div class="stat-value">{{ stats.reference }}</div>
+            <div class="stat-strip"></div>
+        </div>
+        <div class="stat-card amber">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-label">كلمات منخفضة الثقة</div>
+            <div class="stat-value">{{ stats.low_conf }}</div>
+            <div class="stat-strip"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title"><span>📤</span> رفع صورة أو ملف جديد</div>
+        </div>
+        <div class="card-body">
+            <form id="uploadForm">
+                <label for="fileInput">
+                    <div class="upload-zone" id="uploadZone">
+                        <span class="upload-zone-icon">☁️</span>
+                        <div class="upload-zone-title">اسحب الملف هنا أو اضغط للاختيار</div>
+                        <div class="upload-zone-sub">يدعم: JPG · PNG · PDF (كل الصفحات)</div>
+                    </div>
+                </label>
+                <input type="file" id="fileInput" class="upload-file-input" accept="image/*,.pdf">
+                <div class="upload-selected" id="uploadSelected">📎 <span id="uploadFilename"></span></div>
+
+                <!-- ── OCR Mode Toggle ── -->
+                <div class="ocr-mode-bar">
+                    <label>طريقة قراءة الكلمات:</label>
+                    <div class="toggle-group">
+                        <button type="button" class="toggle-btn active" id="modeQari"
+                                onclick="setMode('qari')">
+                            🤖 Qari (Colab)
+                        </button>
+                        <button type="button" class="toggle-btn" id="modePaddle"
+                                onclick="setMode('paddle')">
+                            ⚡ PaddleOCR (محلي)
+                        </button>
+                    </div>
+                    <span class="ocr-mode-hint" id="modeHint">
+                        سيُرسل كل اقتراح لـ Colab للقراءة
+                    </span>
+                </div>
+
+                <div class="upload-actions">
+                    <button type="button" class="btn btn-ghost"
+                            onclick="document.getElementById('fileInput').value='';
+                                     document.getElementById('uploadSelected').style.display='none';">
+                        مسح
+                    </button>
+                    <button class="btn btn-dark" type="submit">بدء المعالجة والتقطيع</button>
+                </div>
+            </form>
+            <div id="processingStatus">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText"></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultsArea">
+        <p class="results-header" id="resultsHeader"></p>
+        <div class="words-grid" id="wordsGrid"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title"><span>📜</span> آخر الكلمات المخزنة في الداتابيس</div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الصورة</th>
+                        <th>النوع</th>
+                        <th>تاريخ الإضافة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for word in recent_words %}
+                    <tr class="fade-in">
+                        <td>
+                            <img src="/{{ word.image_path.lstrip('/') }}"
+                                 class="word-img-sm"
+                                 onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
+                        </td>
+                        <td>
+                            <span class="badge {{ 'badge-success' if word.word_type == 'reference' else 'badge-warning' }}">
+                                {{ word.word_type }}
+                            </span>
+                        </td>
+                        <td class="date-cell">{{ word.added_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ── OCR mode state ──────────────────────────────────────────────
+    let ocrMode = 'qari';   // 'qari' | 'paddle'
+
+    function setMode(mode) {
+        ocrMode = mode;
+        document.getElementById('modeQari').classList.toggle('active',   mode === 'qari');
+        document.getElementById('modePaddle').classList.toggle('active', mode === 'paddle');
+        document.getElementById('modeHint').textContent = mode === 'qari'
+            ? 'سيُرسل كل اقتراح لـ Colab للقراءة'
+            : 'سيستخدم PaddleOCR المحلي لاستخراج النص مباشرة';
+    }
+
+    // ── File picker UX ──────────────────────────────────────────────
+    document.getElementById('fileInput').addEventListener('change', function () {
+        const sel  = document.getElementById('uploadSelected');
+        const name = document.getElementById('uploadFilename');
+        if (this.files[0]) {
+            name.textContent = this.files[0].name;
+            sel.style.display = 'flex';
+        }
+    });
+
+    // ── Upload form ─────────────────────────────────────────────────
+    document.getElementById('uploadForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const file = document.getElementById('fileInput').files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        setStatus('جاري الرفع والتقطيع...', true);
+
+        const res  = await fetch('/api/ocr/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        setStatus('', false);
+
+        if (data.words && data.words.length > 0) {
+            setStatus(`✅ تم اكتشاف ${data.words.length} كلمة`, false);
+        } else {
+            setStatus('⚠️ لم يُكتشف أي نص. جرّب ملفاً أوضح.', false);
+        }
+
+        displayCrops(data.words, data.session_id);
+    };
+
+    function setStatus(msg, loading) {
+        document.getElementById('statusText').textContent = msg;
+        document.getElementById('statusDot').classList.toggle('visible', loading);
+    }
+
+    // ── Word data store — avoids passing JSON through onclick attrs ──
+    // onclick only passes the word index; the function looks up full data here
+    let _wordStore = {};
+
+    // ── Display crops ───────────────────────────────────────────────
+    function displayCrops(words, sid) {
+        const area   = document.getElementById('resultsArea');
+        const header = document.getElementById('resultsHeader');
+        const grid   = document.getElementById('wordsGrid');
+
+        header.textContent = `الكلمات المكتشفة (${words.length}):`;
+        grid.innerHTML = '';
+        _wordStore = {};   // reset
+
+        words.forEach(word => {
+            // Store full word data — referenced by id in onclick
+            _wordStore[word.id] = {
+                path:            word.path,
+                page_image_path: word.page_image_path || word.path,
+                box:             word.box || null,
+                sid:             sid,
+            };
+
+            const pageTag  = word.page
+                ? `<span style="font-size:10px;color:var(--text-muted)">ص${word.page}</span>`
+                : '';
+            const btnLabel = ocrMode === 'qari' ? 'إرسال لـ Qari' : 'قراءة بـ Paddle';
+
+            const card = document.createElement('div');
+            card.className = 'word-card fade-in';
+            card.innerHTML = `
+                <img src="${word.path}" class="word-img" data-word-id="${word.id}" alt="word">
+                <div class="word-card-foot">
+                    ${pageTag}
+                    <button class="btn btn-sm btn-primary-sm btn-send-ocr"
+                            data-path="${word.path}" data-id="${word.id}"
+                            onclick="processWord(this.dataset.path, this.dataset.id, this)">
+                        ${btnLabel}
+                    </button>
+                    <button class="btn btn-sm btn-outline-sm"
+                            data-wordid="${word.id}"
+                            onclick="openCropEditor(this.dataset.wordid)">
+                        ✂️ تعديل القص
+                    </button>
+                </div>`;
+            grid.appendChild(card);
+        });
+
+        area.classList.add('visible');
+    }
+
+    // ── Process word — Qari OR PaddleOCR ───────────────────────────
+    async function processWord(path, id, btn) {
+        const originalText = btn.innerText;
+        btn.innerText  = 'جاري التحليل...';
+        btn.disabled   = true;
+
+        try {
+            let endpoint, body;
+
+            if (ocrMode === 'qari') {
+                // ── Existing Colab/Qari flow — unchanged ──────────
+                endpoint = '/api/ocr/run-ocr';
+                body     = JSON.stringify({ words: [{ id, path }] });
+            } else {
+                // ── PaddleOCR local flow ───────────────────────────
+                // Re-run OCR on this specific crop and save directly
+                endpoint = '/api/ocr/run-ocr-local';
+                body     = JSON.stringify({ words: [{ id, path }] });
+            }
+
+            const res    = await fetch(endpoint, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body,
+            });
+            const result = await res.json();
+            const item   = result.results[0];
+
+            if (item.status === 'saved') {
+                btn.className = 'btn btn-sm btn-success-sm';
+                btn.innerText = '✅ تمت القراءة';
+            } else {
+                btn.innerText = '❌ خطأ';
+                btn.disabled  = false;
+                console.error(item.error);
+            }
+        } catch (e) {
+            btn.innerText = originalText;
+            btn.disabled  = false;
+            alert('فشل الاتصال.');
+        }
+    }
+
+    // ── Crop editor ─────────────────────────────────────────────────
+    // wordId — key into _wordStore (no JSON passed through HTML attrs)
+    function openCropEditor(wordId) {
+        document.getElementById('cropModal')?.remove();
+
+        const w         = _wordStore[wordId];
+        if (!w) { console.error('Word not found in store:', wordId); return; }
+
+        const imgUrl    = w.page_image_path;
+        const sessionId = w.sid;
+        const box       = w.box;
+
+        const modal = document.createElement('div');
+        modal.id    = 'cropModal';
+        modal.style.cssText = [
+            'position:fixed', 'top:0', 'left:0', 'width:100%', 'height:100%',
+            'background:rgba(0,0,0,0.75)', 'z-index:1000',
+            'display:flex', 'align-items:center', 'justify-content:center',
+        ].join(';');
+
+        modal.innerHTML = `
+            <div style="
+                background:var(--surface);border-radius:var(--radius-lg);
+                padding:20px;width:92%;max-width:900px;
+                box-shadow:var(--shadow-md);display:flex;flex-direction:column;gap:14px;">
+
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:14px;font-weight:600;">✂️ تعديل القص — الصفحة كاملة</span>
+                    <span style="font-size:12px;color:var(--text-muted);">
+                        حدد الكلمة بدقة ثم اضغط حفظ
+                    </span>
+                </div>
+
+                <div style="max-height:65vh;overflow:auto;border-radius:var(--radius-md);border:1px solid var(--border);">
+                    <img id="imageToCrop" src="${imgUrl}" style="display:block;max-width:100%;">
+                </div>
+
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                    <button class="btn btn-ghost" id="cropCancelBtn">إلغاء</button>
+                    <button class="btn btn-dark"  id="cropSaveBtn">💾 حفظ القص</button>
+                </div>
+            </div>`;
+
+        document.body.appendChild(modal);
+
+        // Wire buttons via JS — no inline onclick needed
+        document.getElementById('cropCancelBtn').onclick = () => modal.remove();
+        document.getElementById('cropSaveBtn').onclick   = () => saveNewCrop(wordId, sessionId);
+
+        // Init Cropper after image loads
+        const img = document.getElementById('imageToCrop');
+        const initCropper = () => {
+            window.cropper?.destroy();
+            window.cropper = new Cropper(img, {
+                aspectRatio: NaN,
+                viewMode: 1,
+                autoCropArea: 0.15,
+                ready() {
+                    if (!box) return;
+                    const cd     = this.cropper.getCanvasData();
+                    const ir     = this.cropper.getImageData();
+                    const scaleX = cd.width  / ir.naturalWidth;
+                    const scaleY = cd.height / ir.naturalHeight;
+                    this.cropper.setCropBoxData({
+                        left:   cd.left + box.x * scaleX,
+                        top:    cd.top  + box.y * scaleY,
+                        width:  Math.max(box.w * scaleX, 20),
+                        height: Math.max(box.h * scaleY, 20),
+                    });
+                }
+            });
+        };
+
+        if (img.complete && img.naturalWidth > 0) {
+            initCropper();
+        } else {
+            img.onload  = initCropper;
+            img.onerror = () => {
+                console.error('Failed to load image:', imgUrl);
+                modal.querySelector('div > div:nth-child(2)').innerHTML =
+                    '<p style="padding:20px;color:var(--red);">❌ تعذّر تحميل الصورة</p>';
+            };
+        }
+    }
+
+    async function saveNewCrop(wordId, sessionId) {
+        const canvas = window.cropper.getCroppedCanvas();
+        if (!canvas) return;
+
+        canvas.toBlob(async (blob) => {
+            const formData = new FormData();
+            formData.append('file', blob, `fixed_${wordId}.png`);
+            formData.append('word_id', wordId);
+            formData.append('session_id', sessionId);
+
+            try {
+                const res  = await fetch('/api/ocr/update-crop', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    document.getElementById('cropModal').remove();
+                    const imgEl = document.querySelector(`img[data-word-id="${wordId}"]`);
+                    if (imgEl) {
+                        imgEl.src = data.new_url + '?t=' + Date.now();
+                        const sendBtn = imgEl.closest('.word-card').querySelector('.btn-send-ocr');
+                        sendBtn.setAttribute('onclick', `processWord('${data.new_path}', ${wordId}, this)`);
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                alert('حدث خطأ أثناء حفظ القص.');
+            }
+        });
+    }
+</script>
+</body>
+</html>
