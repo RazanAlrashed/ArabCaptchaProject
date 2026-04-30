@@ -100,6 +100,7 @@ Creates CAPTCHA challenges:
      (confuses automated segmentation).
   4. Stores composite_path and ref_end_x in the Challenge row.
 """
+'''
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -271,5 +272,217 @@ def get_challenge(challenge_id: str, db: Session) -> Challenge:
 
 def get_image_url(word_id: int, db: Session) -> str:
     """Get the image URL/path for a word (used for individual fallback)."""
+    word = db.query(Word).filter(Word.word_id == word_id).first()
+    return word.image_path if word else ""
+'''
+
+"""
+services/challenge_service.py
+
+Creates CAPTCHA challenges with full preprocessing + distortion pipeline.
+"""
+
+import uuid
+from datetime import datetime, timedelta
+from pathlib import Path
+
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+
+from app.db.models import SiteSession, Challenge, ReferenceWord, LowConfidenceWord, Word
+from app.core.config import settings
+from app.utils.bot_scorer import determine_difficulty
+
+# NEW: Use the integrated captcha image service with preprocessing
+try:
+    from app.services.captcha_image_service import generate_captcha_composite
+    HAS_CAPTCHA_SERVICE = True
+except ImportError:
+    HAS_CAPTCHA_SERVICE = False
+    print("⚠️  captcha_image_service not found, falling back to basic image_manipulator")
+
+
+_CAPTCHA_DIR = Path("assets") / "captcha"
+
+def create_challenge(session_id: str, db: Session) -> Challenge:
+    """
+    1. Verify session is active.
+    2. Pick random active reference and pending low-confidence words.
+    3. Generate composite CAPTCHA with preprocessing + distortion.
+    4. Persist and return Challenge.
+    """
+    # ── Validate session ──────────────────────────────────────────
+    site_session = db.query(SiteSession).filter(
+        SiteSession.session_id == session_id
+    ).first()
+    if not site_session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if site_session.status != "active":
+        raise HTTPException(status_code=400, detail="Session is not active")
+
+    # ── Pick words ────────────────────────────────────────────────
+    ref_word = (
+        db.query(ReferenceWord)
+        .filter(ReferenceWord.active == True)
+        .order_by(func.random())
+        .first()
+    )
+    if not ref_word:
+        raise HTTPException(status_code=503, detail="No reference words available")
+
+    low_conf_word = (
+        db.query(LowConfidenceWord)
+        .filter(LowConfidenceWord.status == "pending")
+        .order_by(func.random())
+        .first()
+    )
+    if not low_conf_word:
+        raise HTTPException(status_code=503, detail="No low-confidence words available")
+
+    # ── Determine difficulty ──────────────────────────────────────
+    bot_score = site_session.bot_score_initial or 0.5
+    difficulty = determine_difficulty(bot_score)
+
+    # ── Get word image paths ──────────────────────────────────────
+    ref_word_base = db.query(Word).filter(Word.word_id == ref_word.word_id).first()
+    lc_word_base = db.query(Word).filter(Word.word_id == low_conf_word.word_id).first()
+
+    ref_img_path = ref_word_base.image_path.lstrip("/") if ref_word_base else ""
+    lc_img_path = lc_word_base.image_path.lstrip("/") if lc_word_base else ""
+
+    # ── Build composite with preprocessing ─────────────────────────
+    challenge_id = str(uuid.uuid4())
+    composite_file = _CAPTCHA_DIR / f"{challenge_id}.png"
+
+    try:
+        if HAS_CAPTCHA_SERVICE:
+            # Use full preprocessing + distortion pipeline
+            meta = generate_captcha_composite(
+                ref_path=ref_img_path,
+                lc_path=lc_img_path,
+                difficulty=difficulty,
+                output_path=str(composite_file),
+                target_word_height=130,
+                target_word_width=220,
+                preprocess_enabled=True,  # Enable upscaling, contrast, denoise
+            )
+            composite_url = f"/assets/captcha/{challenge_id}.png"
+            ref_end_x = meta["ref_end_x"]
+            
+            print(f"✓ Challenge {challenge_id}:")
+            print(f"  Ref: {meta['ref_size_before']} → {meta['ref_size_after']}")
+            print(f"  LC:  {meta['lc_size_before']} → {meta['lc_size_after']}")
+            print(f"  Composite: {composite_url}")
+        else:
+            # Fallback to basic distortion (no preprocessing)
+            from app.utils.image_manipulator import build_captcha_image
+            meta = build_captcha_image(
+                ref_path=ref_img_path,
+                lc_path=lc_img_path,
+                difficulty=difficulty,
+                output_path=str(composite_file),
+            )
+            composite_url = f"/assets/captcha/{challenge_id}.png"
+            ref_end_x = meta["ref_end_x"]
+            
+    except FileNotFoundError as e:
+        print(f"⚠️  Image not found: {e}. Using placeholder.")
+        composite_url = f"/{ref_img_path}"
+        ref_end_x = -1
+
+    # ── Create challenge DB record ────────────────────────────────
+    challenge = Challenge(
+        challenge_id=challenge_id,
+        session_id=session_id,
+        ref_word_id=ref_word.word_id,
+        low_conf_word_id=low_conf_word.word_id,
+        bot_score=bot_score,
+        difficulty=difficulty,
+        max_attempts=settings.MAX_CHALLENGE_ATTEMPTS,
+        expires_at=datetime.utcnow() + timedelta(minutes=settings.CHALLENGE_EXPIRY_MINUTES),
+        status="pending",
+        composite_image_url=composite_url,
+        ref_end_x=ref_end_x,
+    )
+    db.add(challenge)
+    db.commit()
+    db.refresh(challenge)
+    return challenge
+
+
+
+def upgrade_challenge_difficulty(challenge_id: str, new_score: float, db: Session) -> Challenge:
+    """
+    Regenerate challenge at harder difficulty when bot behavior detected.
+    """
+    challenge = db.query(Challenge).filter(
+        Challenge.challenge_id == challenge_id
+    ).first()
+    if not challenge or challenge.status != "pending":
+        raise HTTPException(status_code=404, detail="Challenge not upgradeable")
+
+    new_difficulty = determine_difficulty(new_score)
+
+    _rank = {"none": 0, "easy": 1, "medium": 2, "hard": 3}
+    if _rank.get(new_difficulty, 0) <= _rank.get(challenge.difficulty, 0):
+        return challenge
+
+    ref_word_base = db.query(Word).filter(Word.word_id == challenge.ref_word_id).first()
+    lc_word_base = db.query(Word).filter(Word.word_id == challenge.low_conf_word_id).first()
+
+    ref_img_path = ref_word_base.image_path.lstrip("/") if ref_word_base else ""
+    lc_img_path = lc_word_base.image_path.lstrip("/") if lc_word_base else ""
+
+    composite_file = _CAPTCHA_DIR / f"{challenge_id}_v2.png"
+    
+    try:
+        if HAS_CAPTCHA_SERVICE:
+            meta = generate_captcha_composite(
+                ref_path=ref_img_path,
+                lc_path=lc_img_path,
+                difficulty=new_difficulty,
+                output_path=str(composite_file),
+                preprocess_enabled=True,
+            )
+        else:
+            from app.utils.image_manipulator import build_captcha_image
+            meta = build_captcha_image(
+                ref_path=ref_img_path,
+                lc_path=lc_img_path,
+                difficulty=new_difficulty,
+                output_path=str(composite_file),
+            )
+        
+        composite_url = f"/assets/captcha/{challenge_id}_v2.png"
+        ref_end_x = meta["ref_end_x"]
+    except Exception as e:
+        print(f"⚠️  Upgrade failed: {e}")
+        return challenge
+
+    challenge.difficulty = new_difficulty
+    challenge.composite_image_url = composite_url
+    challenge.ref_end_x = ref_end_x
+    challenge.bot_score = new_score
+    challenge.attempts_count = 0
+    db.commit()
+    db.refresh(challenge)
+
+    print(f"🔴 Challenge {challenge_id} upgraded → {new_difficulty} (score={new_score})")
+    return challenge
+
+
+def get_challenge(challenge_id: str, db: Session) -> Challenge:
+    """Fetch a challenge by ID or 404."""
+    challenge = db.query(Challenge).filter(
+        Challenge.challenge_id == challenge_id
+    ).first()
+    if not challenge:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    return challenge
+
+
+def get_image_url(word_id: int, db: Session) -> str:
+    """Get the image URL/path for a word (fallback)."""
     word = db.query(Word).filter(Word.word_id == word_id).first()
     return word.image_path if word else ""

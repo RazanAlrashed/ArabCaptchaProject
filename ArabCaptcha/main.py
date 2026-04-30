@@ -11,7 +11,8 @@ from sqlalchemy.orm import Session
 # استيراد المكونات من المجلد الداخلي app
 from app.db.session import engine, Base, get_db
 from app.routers import session, challenge, solve, ocr, admin
-from app.db.models import Word, ReferenceWord, LowConfidenceWord
+from app.db.models import Word, ReferenceWord, LowConfidenceWord ,Challenge
+from sqlalchemy import func
 
 if os.environ.get("ARABCAPTCHA_SECRET", "change-me-in-production") == "change-me-in-production":
     print("⚠️  WARNING: ARABCAPTCHA_SECRET env var not set. Set it before going to production.")
@@ -37,6 +38,9 @@ os.makedirs("assets/captcha", exist_ok=True)
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 app.mount("/public", StaticFiles(directory="public"), name="public")
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+#app.mount("/templates", StaticFiles(directory="templates"), name="templates")
+
 templates = Jinja2Templates(directory="templates")
 
 # 4. تضمين الروترات مع البادئة الموحدة لتنظيم الـ Swagger
@@ -46,23 +50,67 @@ app.include_router(challenge.router, prefix="/api", tags=["Challenges"])
 app.include_router(solve.router, prefix="/api", tags=["Validation"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 # 5. واجهة لوحة البيانات (Dashboard) - الصفحة الرئيسية
+# ابحث عن المسار الرئيسي وقم بتعديله كالتالي:
+# ابحث عن المسار الرئيسي السابق وقم بتغييره بالكامل إلى هذا:
+
 @app.get("/", include_in_schema=False)
-async def dashboard_view(request: Request, db: Session = Depends(get_db)):
-    # جلب الإحصائيات الحقيقية من قاعدة البيانات [cite: 5, 11]
+async def admin_portal(request: Request):
+    # هذه هي الصفحة التي ستفتح فور تشغيل السيرفر
+    return templates.TemplateResponse("admin.html", {"request": request})
+
+@app.get("/dashboard", include_in_schema=False)
+async def dashboard_page(request: Request, db: Session = Depends(get_db)):
+    # جلب البيانات المطلوبة للداشبورد
     stats = {
         "total": db.query(Word).count(),
         "reference": db.query(ReferenceWord).count(),
         "low_conf": db.query(LowConfidenceWord).count(),
     }
-    
-    # جلب آخر 10 كلمات تمت معالجتها
     recent_words = db.query(Word).order_by(Word.added_at.desc()).limit(10).all()
-    
     return templates.TemplateResponse("dashboard.html", {
         "request": request, 
         "stats": stats,
         "recent_words": recent_words
     })
+
+# 1. مسار صفحة التحديات (Challenges Page)
+@app.get("/challenges", include_in_schema=False)
+async def challenges_page(request: Request, db: Session = Depends(get_db)):
+    # جلب إحصائيات مفيدة وشاملة
+    stats = {
+        "total_attempts": db.query(Challenge).count(),
+        "passed": db.query(Challenge).filter(Challenge.status == 'passed').count(),
+        "failed": db.query(Challenge).filter(Challenge.status == 'failed').count(),
+        # متوسط درجة البوت (كلما زادت زاد الاشتباه بالنشاط الآلي)
+        "avg_bot_score": db.query(func.avg(Challenge.bot_score)).scalar() or 0
+    }
+    return templates.TemplateResponse("challenges.html", {
+        "request": request,
+        "stats": stats
+    })
+
+# 2. API لجلب البيانات للجدول بشكل حي
+@app.get("/admin/recent-challenges")
+async def get_recent_challenges(db: Session = Depends(get_db)):
+    # جلب آخر 50 محاولة من الداتابيس
+    challenges = db.query(Challenge).order_by(Challenge.created_at.desc()).limit(50).all()
+    # تحويل البيانات لتنسيق JSON متوافق مع الفرونت إند
+    return [
+        {
+            "session_id": c.session_id,
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+            "difficulty": c.difficulty,
+            "status": c.status,
+            "bot_score": c.bot_score or 0
+        } for c in challenges
+    ]
+@app.get("/live-demo", include_in_schema=False)
+async def live_demo_page(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/bot-simulation", include_in_schema=False)
+async def bot_sim_page(request: Request):
+    return templates.TemplateResponse("bot_demo.html", {"request": request})
 
 # 6. معالج الأخطاء المطور لسهولة الـ Debugging
 @app.exception_handler(Exception)

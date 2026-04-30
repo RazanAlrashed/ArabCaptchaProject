@@ -51,10 +51,3 @@ LEFT JOIN behavior_log b
 LEFT JOIN challenge c
        ON c.session_id = s.session_id
 ORDER BY s.session_created_at DESC;
-
--- ─────────────────────────────────────────────────────────────
--- Index to speed up consensus lookups
--- ─────────────────────────────────────────────────────────────
-CREATE INDEX IF NOT EXISTS idx_challenge_session  ON challenge(session_id);
-CREATE INDEX IF NOT EXISTS idx_challenge_status   ON challenge(status);
-CREATE INDEX IF NOT EXISTS idx_attempt_challenge  ON attempt(challenge_id);

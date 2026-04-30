@@ -1,8 +1,8 @@
-"""initial_tables
+"""initial_setup
 
-Revision ID: bad94140f2d5
+Revision ID: 82db5618e692
 Revises: 
-Create Date: 2026-02-24 02:40:10.010008
+Create Date: 2026-04-28 00:06:33.805060
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'bad94140f2d5'
+revision: str = '82db5618e692'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -25,14 +25,14 @@ def upgrade() -> None:
     sa.Column('site_name', sa.String(length=255), nullable=False),
     sa.Column('api_key_hash', sa.String(length=255), nullable=False),
     sa.Column('status', sa.String(length=50), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('site_id'),
     sa.UniqueConstraint('api_key_hash')
     )
     op.create_table('word',
     sa.Column('word_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('image_path', sa.String(length=500), nullable=False),
-    sa.Column('added_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('added_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('word_type', sa.String(length=20), nullable=False),
     sa.PrimaryKeyConstraint('word_id')
     )
@@ -40,7 +40,7 @@ def upgrade() -> None:
     sa.Column('domain_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('site_id', sa.Integer(), nullable=False),
     sa.Column('domain_url', sa.String(length=255), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['site_id'], ['client_site.site_id'], ),
     sa.PrimaryKeyConstraint('domain_id')
     )
@@ -65,7 +65,7 @@ def upgrade() -> None:
     op.create_table('site_session',
     sa.Column('session_id', sa.String(length=36), nullable=False),
     sa.Column('site_id', sa.Integer(), nullable=False),
-    sa.Column('session_created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('session_created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('bot_score_initial', sa.Float(), nullable=True),
     sa.Column('bot_score_final', sa.Float(), nullable=True),
     sa.Column('risk_level', sa.String(length=10), nullable=True),
@@ -76,7 +76,7 @@ def upgrade() -> None:
     op.create_table('behavior_log',
     sa.Column('log_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('session_id', sa.String(length=36), nullable=False),
-    sa.Column('timestamp', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('timestamp', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('event_type', sa.String(length=100), nullable=False),
     sa.Column('signals_json', sa.Text(), nullable=True),
     sa.ForeignKeyConstraint(['session_id'], ['site_session.session_id'], ),
@@ -90,10 +90,12 @@ def upgrade() -> None:
     sa.Column('bot_score', sa.Float(), nullable=True),
     sa.Column('difficulty', sa.String(length=10), nullable=False),
     sa.Column('max_attempts', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('expires_at', sa.DateTime(), nullable=False),
     sa.Column('status', sa.String(length=10), nullable=False),
     sa.Column('is_human_verified', sa.Boolean(), nullable=False),
+    sa.Column('composite_image_url', sa.String(), nullable=True),
+    sa.Column('ref_end_x', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['low_conf_word_id'], ['low_confidence_word.word_id'], ),
     sa.ForeignKeyConstraint(['ref_word_id'], ['reference_word.word_id'], ),
     sa.ForeignKeyConstraint(['session_id'], ['site_session.session_id'], ),
@@ -106,7 +108,7 @@ def upgrade() -> None:
     sa.Column('total', sa.Integer(), nullable=False),
     sa.Column('ratio', sa.Float(), nullable=False),
     sa.Column('is_verified', sa.Boolean(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['low_conf_word_id'], ['low_confidence_word.word_id'], ),
     sa.PrimaryKeyConstraint('low_conf_word_id')
     )
@@ -120,7 +122,7 @@ def upgrade() -> None:
     sa.Column('low_conf_input_normalized', sa.String(length=255), nullable=True),
     sa.Column('passed', sa.Boolean(), nullable=False),
     sa.Column('response_time_ms', sa.Float(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('signals_json', sa.Text(), nullable=True),
     sa.ForeignKeyConstraint(['challenge_id'], ['challenge.challenge_id'], ),
     sa.PrimaryKeyConstraint('attempt_id')
@@ -131,7 +133,7 @@ def upgrade() -> None:
     sa.Column('attempt_id', sa.Integer(), nullable=False),
     sa.Column('submitted_text', sa.String(length=255), nullable=False),
     sa.Column('normalized_text', sa.String(length=255), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['attempt_id'], ['attempt.attempt_id'], ),
     sa.ForeignKeyConstraint(['low_conf_word_id'], ['low_confidence_word.word_id'], ),
     sa.PrimaryKeyConstraint('submission_id')

@@ -27,18 +27,18 @@ class Settings(BaseSettings):
     # Scores below LOW_RISK_THRESHOLD → Easy CAPTCHA
     # Scores between LOW and HIGH    → Medium CAPTCHA
     # Scores above HIGH_RISK_THRESHOLD → Hard/Rejected CAPTCHA
-    LOW_RISK_THRESHOLD: int = 30
-    HIGH_RISK_THRESHOLD: int = 70
+    #LOW_RISK_THRESHOLD: int = 20
+    #HIGH_RISK_THRESHOLD: int = 60
 
     # ── Bot Score Signal Weights ──────────────────────────────────────────────
     # Points added to the bot score when each suspicious signal is detected.
     # Increase a weight to be stricter about that signal.
-    WEIGHT_FAST_SUBMIT: int = 35      # Submitted in < 800ms
-    WEIGHT_PASTE_USED: int = 25       # Answer was pasted, not typed
-    WEIGHT_NO_MOUSE: int = 15         # Zero mouse moves AND zero scrolls
-    WEIGHT_WEBDRIVER: int = 40        # Browser is controlled by automation (Selenium, etc.)
-    WEIGHT_FAST_FIRST_INTERACTION: int = 15  # First keystroke/click in < 150ms
-    WEIGHT_FOCUS_BLUR: int = 10       # Switched tabs > 3 times
+    #WEIGHT_FAST_SUBMIT: int = 50      # Submitted in < 800ms
+    #WEIGHT_PASTE_USED: int = 25       # Answer was pasted, not typed
+    #WEIGHT_NO_MOUSE: int = 40         # Zero mouse moves AND zero scrolls
+    #WEIGHT_WEBDRIVER: int = 80        # Browser is controlled by automation (Selenium, etc.)
+    #WEIGHT_FAST_FIRST_INTERACTION: int = 15  # First keystroke/click in < 150ms
+    #WEIGHT_FOCUS_BLUR: int = 10       # Switched tabs > 3 times
     WEIGHT_TOO_MANY_ATTEMPTS: int = 15  # Failed the challenge >= 3 times
 
     # ── Consensus (Crowdsourcing) Settings ───────────────────────────────────
@@ -66,3 +66,6 @@ class Settings(BaseSettings):
 
 # A single shared instance used across the entire application.
 settings = Settings()
+
+# في آخر سطر بالملف بعد settings = Settings()
+print(f"DEBUG: Application is connecting to: {settings.DATABASE_URL}")

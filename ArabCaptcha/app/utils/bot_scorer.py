@@ -116,34 +116,34 @@ W = {
     # Hard bot indicators
     "webdriver":                   -0.45,
     "paste_used":                  -0.15,
-    "no_mouse_no_scroll":          -0.30,
+    "no_mouse_no_scroll":          -0.50,
 
     # Timing — bot penalties
-    "first_interaction_superhuman": -0.25,   # < 100 ms
+    "first_interaction_superhuman": -0.40,   # < 100 ms
     "first_interaction_fast":       -0.10,   # 100–300 ms
-    "submit_superhuman":            -0.20,   # < 500 ms
+    "submit_superhuman":            -0.40,   # < 500 ms
     "submit_fast":                  -0.05,   # 500–2000 ms
     "time_on_page_short":           -0.10,   # < 1000 ms
 
     # Timing — human bonuses
-    "first_interaction_natural":   +0.10,   # 300–8000 ms
+    "first_interaction_natural":   +0.20,   # 300–8000 ms
     "submit_natural":              +0.10,   # 2000–60000 ms
     "time_on_page_ok":             +0.05,   # > 2000 ms
 
     # Mouse
     "good_mouse_activity":         +0.10,   # > 20 moves
-    "robotic_mouse_pattern":       -0.10,
-    "mouse_speed_superhuman":      -0.15,   # avg > 5 px/ms
+    "robotic_mouse_pattern":       -0.30,
+    "mouse_speed_superhuman":      -0.10,   # avg > 5 px/ms
 
     # Keyboard
-    "robotic_keystroke_rhythm":    -0.20,
+    "robotic_keystroke_rhythm":    -0.40,
     "natural_keystroke_rhythm":    +0.10,
     "superhuman_key_release":      -0.10,
     "natural_key_hold":            +0.05,
 
     # Device
     "touch_device":                +0.15,
-    "headless_screen_size":        -0.20,   # 800×600 (Puppeteer default)
+    "headless_screen_size":        -0.35,   # 800×600 (Puppeteer default)
     "common_headless_size":        -0.05,   # 1280×720 without touch
 
     # Session history
@@ -282,9 +282,9 @@ def determine_risk_level(score: float) -> str:
     """0.0 = bot, 1.0 = human."""
     if score >= 0.8:
         return "trusted"
-    elif score >= 0.5:
+    elif score >= 0.65:
         return "low"
-    elif score >= 0.3:
+    elif score >= 0.30:
         return "medium"
     else:
         return "high"
@@ -294,9 +294,9 @@ def determine_difficulty(score: float) -> str:
     """Returns challenge difficulty based on human-confidence score."""
     if score >= 0.8:
         return "none"      # skip challenge entirely
-    elif score >= 0.5:
+    elif score >= 0.65:
         return "easy"
-    elif score >= 0.3:
+    elif score >= 0.30:
         return "medium"
     else:
         return "hard"

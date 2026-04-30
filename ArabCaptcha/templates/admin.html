@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArabCaptcha Admin Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #F5F4F0;
+            --surface: #FFFFFF;
+            --border: #E2DFDA;
+            --accent: #1A1917;
+            --text-secondary: #6B6860;
+        }
+        body { 
+            font-family: 'IBM Plex Sans Arabic', sans-serif; 
+            background: var(--bg);
+            overflow: hidden; /* Prevent body scroll, use iframe scroll */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .super-topbar {
+            background: #6b5f52;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 1000;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 16px; color: white; }
+        .logo-box { background: white; color: #6b5f52; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        
+        .nav-menu { display: flex; gap: 8px; background: rgba(0,0,0,0.1); padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .nav-btn { 
+            padding: 8px 20px; 
+            border: none; 
+            background: transparent; 
+            font-family: inherit; 
+            font-weight: 500; 
+            font-size: 14px; 
+            color: rgba(255,255,255,0.8); 
+            cursor: pointer; 
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .nav-btn.active { background: white; color: #6b5f52; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        #contentFrame { flex-grow: 1; border: none; width: 100%; height: 100%; }
+        
+        .status-badge { font-size: 12px; color: #2D6A4F; background: #EBF5F0; padding: 4px 12px; border-radius: 20px; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<div class="super-topbar">
+    <div class="brand">
+        <div class="logo-box">🛡️</div>
+        <span>ArabCaptcha Admin</span>
+    </div>
+    
+    <div class="nav-menu">
+        <button class="nav-btn active" onclick="switchPage('/dashboard', this)">الكلمات (Dashboard)</button>
+        <button class="nav-btn" onclick="switchPage('/challenges', this)">المراقبة</button>
+        <button class="nav-btn" onclick="switchPage('/live-demo', this)">تجربة حية</button>
+        <button class="nav-btn" onclick="switchPage('/bot-simulation', this)">محاكاة الاختبار</button>
+    </div>
+
+    <div class="status-badge">● النظام متصل</div>
+</div>
+
+<iframe id="contentFrame" src="/dashboard" style="width:100%; height:100%; border:none;"></iframe>
+
+<script>
+function switchPage(url, btn) {
+    // تغيير رابط الإطار
+    document.getElementById('contentFrame').src = url;
+    
+    // تحديث شكل الأزرار (إزالة active من الكل وإضافتها للمضغطوط عليه)
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>
