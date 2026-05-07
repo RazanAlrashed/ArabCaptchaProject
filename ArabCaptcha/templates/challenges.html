@@ -1,114 +1,265 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مراقبة التحديات | ArabCaptcha</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        :root {
-            --bg:#F5F4F0; --surface:#FFFFFF; --border:#E2DFDA;
-            --text-primary:#1A1917; --text-secondary:#6B6860;
-            --accent:#6b5f52; --green:#2D6A4F; --red:#991B1B; --blue:#1E3A8A;
-            --radius-lg:14px;
-        }
-        body { font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg); padding:30px; color:var(--text-primary); }
-        
-        /* Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: var(--surface); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .stat-value { font-size: 28px; font-weight: 600; margin-top: 8px; }
-        .stat-label { color: var(--text-secondary); font-size: 14px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مراقبة التحديات | ArabCaptcha</title>
 
-        /* Table Style */
-        .table-container { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; }
-        table { width: 100%; border-collapse: collapse; text-align: right; }
-        th { background: #fcfbf9; padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
-        td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
-        
-        /* Badges */
-        .badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; }
-        .badge-success { background: #EBF5F0; color: var(--green); }
-        .badge-danger { background: #FEF2F2; color: var(--red); }
-        .badge-blue { background: #EFF6FF; color: var(--blue); }
-    </style>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --text-primary:#1A1917;
+    --text-secondary:#6B6860;
+
+    --accent:#6B5F52;
+    --green:#2D6A4F;
+    --red:#991B1B;
+    --blue:#1E3A8A;
+
+    --border:#E2DFDA;
+}
+
+/* ===== Background (Dashboard Style) ===== */
+body {
+    font-family:'IBM Plex Sans Arabic',sans-serif;
+    background:
+        linear-gradient(rgba(120, 105, 88, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(120, 105, 88, 0.035) 1px, transparent 1px),
+        radial-gradient(circle at top right, rgba(107, 95, 82, 0.16), transparent 35%),
+        linear-gradient(135deg, #F8F4EC 0%, #EFE5D6 100%);
+    background-size: 32px 32px, 32px 32px, auto, auto;
+    padding: 30px;
+    color: var(--text-primary);
+}
+
+/* ===== Title ===== */
+h2 {
+    margin-bottom: 25px;
+    font-weight: 600;
+    color: #3b2f25;
+}
+
+/* ===== Stats (Same Dashboard Style) ===== */
+.stats-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:20px;
+    margin-bottom:28px;
+}
+
+.stat-card {
+    position:relative;
+    background:rgba(255,255,255,0.72);
+    backdrop-filter: blur(14px);
+    border:1px solid rgba(214, 202, 186, 0.85);
+    border-radius:22px;
+    padding:28px 26px;
+    min-height:135px;
+    box-shadow:0 18px 45px rgba(84, 67, 48, 0.10);
+    overflow:hidden;
+}
+
+.stat-card::before {
+    content:"";
+    position:absolute;
+    top:-18px;
+    right:-18px;
+    width:66px;
+    height:66px;
+    background:rgba(214, 202, 186, 0.45);
+    border-radius:0 0 0 28px;
+}
+
+.stat-card::after {
+    content:"";
+    position:absolute;
+    left:24px;
+    right:24px;
+    bottom:20px;
+    height:4px;
+    background:#C9B9A6;
+    border-radius:999px;
+}
+
+.stat-label {
+    position:relative;
+    z-index:1;
+    color:#6B5F52;
+    font-size:13px;
+    font-weight:500;
+    margin-bottom:12px;
+}
+
+.stat-value {
+    position:relative;
+    z-index:1;
+    font-size:34px;
+    font-weight:600;
+}
+
+/* ===== Table ===== */
+.table-container {
+    background:rgba(255,255,255,0.75);
+    backdrop-filter: blur(12px);
+    border-radius:20px;
+    border:1px solid var(--border);
+    box-shadow:0 15px 40px rgba(0,0,0,0.08);
+    overflow:hidden;
+}
+
+table {
+    width:100%;
+    border-collapse:collapse;
+    text-align:right;
+}
+
+th {
+    background:rgba(255,255,255,0.6);
+    padding:16px;
+    font-size:13px;
+    color:var(--text-secondary);
+    border-bottom:1px solid var(--border);
+}
+
+td {
+    padding:16px;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+}
+
+tbody tr:hover {
+    background:rgba(255,255,255,0.4);
+}
+
+/* ===== Badges ===== */
+.badge {
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:500;
+}
+
+.badge-success {
+    background:#EAF7EC;
+    color:#2E7D32;
+}
+
+.badge-danger {
+    background:#FDECEA;
+    color:#C62828;
+}
+
+.badge-blue {
+    background:#EEF3FF;
+    color:#3F51B5;
+}
+
+/* ===== Responsive ===== */
+@media (max-width:768px){
+    .table-container {
+        overflow-x:auto;
+    }
+
+    table {
+        min-width:700px;
+    }
+}
+</style>
 </head>
+
 <body>
 
-    <h2 style="margin-bottom: 25px;">مراقبة التحديات الحية</h2>
+<h2>مراقبة التحديات الحية</h2>
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-label">إجمالي المحاولات</div>
-            <div class="stat-value" style="color: var(--accent);">{{ stats.total_attempts }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">محاولات ناجحة</div>
-            <div class="stat-value" style="color: var(--green);">{{ stats.passed }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">محاولات فاشلة</div>
-            <div class="stat-value" style="color: var(--red);">{{ stats.failed }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">متوسط دقة البوت</div>
-            <div class="stat-value" style="color: var(--blue);">{{ "%.1f"|format(stats.avg_bot_score) }}%</div>
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">إجمالي المحاولات</div>
+        <div class="stat-value" style="color: var(--accent);">
+            {{ stats.total_attempts }}
         </div>
     </div>
 
-    <div class="table-container">
-        <table>
-            <thead>
+    <div class="stat-card">
+        <div class="stat-label">محاولات ناجحة</div>
+        <div class="stat-value" style="color: var(--green);">
+            {{ stats.passed }}
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">محاولات فاشلة</div>
+        <div class="stat-value" style="color: var(--red);">
+            {{ stats.failed }}
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">متوسط دقة البوت</div>
+        <div class="stat-value" style="color: var(--blue);">
+            {{ "%.1f"|format(stats.avg_bot_score) }}%
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>معرف الجلسة</th>
+                <th>وقت المحاولة</th>
+                <th>الصعوبة</th>
+                <th>الحالة</th>
+                <th>نسبة البوت</th>
+            </tr>
+        </thead>
+
+        <tbody id="challengesTableBody"></tbody>
+    </table>
+</div>
+
+<script>
+async function loadChallenges() {
+    try {
+        const response = await fetch('/admin/recent-challenges');
+        const data = await response.json();
+        const body = document.getElementById('challengesTableBody');
+
+        body.innerHTML = data.map(c => {
+            const sid = c.session_id ? c.session_id.substr(0, 8) : '---';
+            const date = c.created_at ? new Date(c.created_at).toLocaleString('ar-SA') : 'غير متوفر';
+            const statusText = c.status === 'passed' ? 'ناجح' : 'فشل/بانتظار';
+            const statusClass = c.status === 'passed' ? 'badge-success' : 'badge-danger';
+            const score = parseFloat(c.bot_score).toFixed(1);
+
+            return `
                 <tr>
-                    <th>معرف الجلسة</th>
-                    <th>وقت المحاولة</th>
-                    <th>الصعوبة</th>
-                    <th>الحالة</th>
-                    <th>نسبة البوت</th>
+                    <td style="font-family:monospace; color:var(--blue)">#${sid}</td>
+                    <td style="color:var(--text-secondary)">${date}</td>
+                    <td><span class="badge badge-blue">${c.difficulty.toUpperCase()}</span></td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td style="font-weight:bold; color:${score > 50 ? 'var(--red)' : 'var(--green)'}">
+                        ${score}%
+                    </td>
                 </tr>
-            </thead>
-            <tbody id="challengesTableBody">
-                </tbody>
-        </table>
-    </div>
+            `;
+        }).join('');
+    } catch (e) {
+        console.error('Error loading data:', e);
+    }
+}
 
-    <script>
-        async function loadChallenges() {
-            try {
-                const response = await fetch('/admin/recent-challenges');
-                const data = await response.json();
-                const body = document.getElementById('challengesTableBody');
-                
-                body.innerHTML = data.map(c => {
-                    const sid = c.session_id ? c.session_id.substr(0, 8) : '---';
-                    const date = c.created_at ? new Date(c.created_at).toLocaleString('ar-SA') : 'غير متوفر';
-                    const statusText = c.status === 'passed' ? 'ناجح' : 'فشل/بانتظار';
-                    const statusClass = c.status === 'passed' ? 'badge-success' : 'badge-danger';
-                    const score = parseFloat(c.bot_score).toFixed(1);
-                    
-                    return `
-                        <tr>
-                            <td style="font-family:monospace; color:var(--blue)">#${sid}</td>
-                            <td style="color:var(--text-secondary)">${date}</td>
-                            <td><span class="badge badge-blue">${c.difficulty.toUpperCase()}</span></td>
-                            <td><span class="badge ${statusClass}">${statusText}</span></td>
-                            <td style="font-weight:bold; color:${score > 50 ? 'var(--red)' : 'var(--green)'}">
-                                ${score}%
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            } catch (e) {
-                console.error('Error loading data:', e);
-            }
-        }
+document.addEventListener('DOMContentLoaded', () => {
+    loadChallenges();
+    setInterval(loadChallenges, 30000);
+});
+</script>
 
-        // تحديث البيانات كل 30 ثانية
-        document.addEventListener('DOMContentLoaded', () => {
-            loadChallenges();
-            setInterval(loadChallenges, 30000);
-        });
-    </script>
 </body>
 </html>

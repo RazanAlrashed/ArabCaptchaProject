@@ -6,19 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ArabCaptcha | نظام التحقق البشري الذكي</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --primary: #6b5f52;
-            --primary-light: #8a7c6d;
             --primary-dark: #4a4239;
             --accent: #d4a373;
-            --bg: #faf9f6;
-            --text: #2d2a26;
-            --muted: #7a746e;
-            --white: #ffffff;
-            --glass: rgba(255, 255, 255, 0.85);
-            --border: rgba(107, 95, 82, 0.12);
-            --shadow: 0 20px 40px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+            --bg: #f8f4ec;
+            --text: #3b2f25;
+            --muted: #6b5f52;
+            --white: rgba(255,255,255,0.72);
+            --border: rgba(214,202,186,0.85);
+            --shadow: 0 18px 45px rgba(84,67,48,0.12);
+            --radius: 22px;
         }
 
         * {
@@ -28,112 +28,105 @@
         }
 
         body {
-            background-color: var(--bg);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(107, 95, 82, 0.03) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(212, 163, 115, 0.03) 0px, transparent 50%);
-            font-family: 'IBM Plex Sans Arabic', -apple-system, system-ui, sans-serif;
+            font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
             color: var(--text);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
             min-height: 100vh;
+            background:
+                linear-gradient(rgba(120,105,88,0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(120,105,88,0.045) 1px, transparent 1px),
+                radial-gradient(circle at top right, rgba(107,95,82,0.18), transparent 38%),
+                linear-gradient(135deg, #F8F4EC 0%, #EFE5D6 100%);
+            background-size: 32px 32px, 32px 32px, auto, auto;
+            line-height: 1.6;
         }
 
-        /* --- Header --- */
-        header {
-            padding: 24px 60px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .logo-wrap {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            text-decoration: none;
-        }
-
-        .brand-text {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--primary);
-            letter-spacing: -0.5px;
-        }
-
-        /* --- Hero --- */
         .hero {
             max-width: 1200px;
-            margin: 80px auto 60px;
+            margin: 70px auto 50px;
             text-align: center;
             padding: 0 24px;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 3.4rem;
             font-weight: 700;
-            line-height: 1.2;
             color: var(--text);
-            margin-bottom: 20px;
-            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
         }
 
         .hero p {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             color: var(--muted);
-            margin: 0 auto;
         }
 
-        /* --- Main Content --- */
         .main-grid {
             max-width: 1150px;
-            margin: 0 auto 100px;
+            margin: 0 auto 70px;
             padding: 0 40px;
             display: grid;
             grid-template-columns: 1.15fr 0.85fr;
-            gap: 50px;
+            gap: 36px;
             align-items: flex-start;
         }
 
-        .showcase-area {
+        .glass-card,
+        .simulator-box {
             position: relative;
+            overflow: hidden;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(14px);
         }
 
         .glass-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 32px;
-            padding: 30px;
-            box-shadow: var(--shadow);
-            position: relative;
-            display: flex;
-            flex-direction: column;
+            padding: 32px;
+            min-height: 300px;
+        }
+
+        .simulator-box {
+            padding: 32px;
+        }
+
+        .glass-card::after,
+        .simulator-box::after {
+            content: "";
+            position: absolute;
+            top: -18px;
+            right: -18px;
+            width: 72px;
+            height: 72px;
+            background: rgba(214,202,186,0.45);
+            border-radius: 0 0 0 30px;
+            z-index: 0;
         }
 
         .glass-card::before {
-            content: '';
+            content: "";
             position: absolute;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 6px;
-            background: linear-gradient(to left, var(--primary), var(--accent));
+            inset-inline: 24px;
+            height: 4px;
+            background: #c9b9a6;
+            border-radius: 999px;
+        }
+
+        .glass-card > *,
+        .simulator-box > * {
+            position: relative;
+            z-index: 1;
         }
 
         .card-title {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 40px;
+            color: var(--primary-dark);
+            margin-bottom: 34px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .card-title .dot {
@@ -141,14 +134,14 @@
             height: 10px;
             background: #27ae60;
             border-radius: 50%;
-            box-shadow: 0 0 12px rgba(39, 174, 96, 0.4);
+            box-shadow: 0 0 12px rgba(39,174,96,0.35);
         }
 
         .widget-container {
             width: 100%;
-            max-width: 440px; 
+            max-width: 440px;
             margin: 0 auto;
-            padding-bottom: 40px;
+            padding-bottom: 30px;
         }
 
         #captchaFrame {
@@ -156,129 +149,141 @@
             border: none;
             display: block;
             background: transparent;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* --- Simulator --- */
-        .simulator-box {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
         }
 
         .sim-header {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            margin-bottom: 25px;
-            letter-spacing: 0.8px;
+            color: var(--primary-dark);
+            margin-bottom: 24px;
         }
 
         .sim-metrics {
-            background: #fcfcfb;
-            border: 1px solid rgba(0,0,0,0.04);
-            border-radius: 16px;
-            padding: 20px;
+            background: rgba(255,255,255,0.58);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 22px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .metric {
-            display: flex;
-            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         .metric-label {
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             color: var(--muted);
             font-weight: 600;
             margin-bottom: 6px;
+            display: block;
         }
 
         .metric-val {
-            font-size: 1.3rem;
+            font-size: 1.35rem;
             font-weight: 700;
             color: var(--text);
         }
 
         .sim-actions {
             display: grid;
-            grid-template-columns: 1fr;
             gap: 12px;
         }
 
         .btn-sim {
             border: 1px solid var(--border);
-            background: var(--white);
-            padding: 14px 20px;
-            border-radius: 14px;
+            background: rgba(255,255,255,0.72);
+            padding: 14px 18px;
+            border-radius: 16px;
             font-family: inherit;
             font-size: 0.95rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: 0.2s ease;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: var(--text);
         }
 
         .btn-sim:hover {
-            border-color: var(--primary);
-            transform: translateX(-6px);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(84,67,48,0.10);
         }
 
-        .btn-sim i { font-style: normal; font-size: 0.8rem; padding: 4px 10px; border-radius: 8px; font-weight: 700; }
+        .btn-sim i {
+            font-style: normal;
+            font-size: 0.8rem;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+
         .btn-sim.easy i { background: #e8f5e9; color: #1b5e20; }
         .btn-sim.medium i { background: #fff8e1; color: #e65100; }
         .btn-sim.hard i { background: #ffebee; color: #b71c1c; }
 
-        /* --- Integration --- */
         .integration-area {
             max-width: 1150px;
-            margin: 0 auto 100px;
+            margin: 0 auto 70px;
             padding: 0 40px;
         }
+
         .code-window {
-            background: #1e1e1e;
-            border-radius: 16px;
+            background: #1f1d1a;
+            border-radius: 18px;
             overflow: hidden;
             direction: ltr;
+            border: 1px solid rgba(255,255,255,0.08);
         }
+
         .code-header {
-            background: #2d2d2d;
-            padding: 12px 20px;
+            background: #2d2924;
+            padding: 13px 20px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            color: #aaa;
+            color: #d8d0c6;
             font-size: 0.85rem;
         }
+
         .btn-copy {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.16);
             color: #fff;
-            padding: 4px 12px;
-            border-radius: 6px;
+            padding: 5px 13px;
+            border-radius: 10px;
             cursor: pointer;
         }
+
         .code-window pre {
             padding: 24px;
-            color: #dcdcaa;
-            font-family: 'Consolas', monospace;
+            color: #f2d7a6;
+            font-family: Consolas, monospace;
             font-size: 0.9rem;
+            overflow-x: auto;
         }
 
         footer {
-            padding: 50px 60px;
+            padding: 38px 60px;
             border-top: 1px solid var(--border);
             text-align: center;
             color: var(--muted);
-            background: #fff;
+            background: rgba(255,255,255,0.45);
+            backdrop-filter: blur(10px);
+        }
+
+        @media (max-width: 900px) {
+            .hero h1 {
+                font-size: 2.3rem;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+                padding: 0 20px;
+            }
+
+            .integration-area {
+                padding: 0 20px;
+            }
         }
     </style>
 </head>
@@ -298,7 +303,6 @@
                     نظام التحقق المباشر
                 </div>
                 <div class="widget-container">
-                    <!-- تعديل: التأكد من المسار الصحيح للملف المحلي -->
                     <iframe id="captchaFrame" scrolling="no" allowtransparency="true" src="/public/widget.html"></iframe>
                 </div>
             </div>
@@ -346,7 +350,6 @@
                     <span>HTML / JavaScript</span>
                     <button class="btn-copy" onclick="copyCode()">نسخ الكود</button>
                 </div>
-                <!-- تم تغيير الرابط هنا ليكون محلياً بدلاً من Render -->
                 <pre id="integrationCode"><code>&lt;!-- حاوية الكابتشا --&gt;
 &lt;div id="arab-captcha" data-sitekey="YOUR_SITE_KEY"&gt;&lt;/div&gt;
 
@@ -371,16 +374,13 @@
         
         const frame = document.getElementById('captchaFrame');
 
-        // التعامل مع الرسائل القادمة من الـ Widget
         window.addEventListener('message', (e) => {
             if (!e.data) return;
             
-            // تعديل حجم الـ Iframe تلقائياً
             if (e.data.type === 'ARABCAPTCHA_RESIZE' && e.data.height) {
                 frame.style.height = (e.data.height + 20) + 'px'; 
             }
             
-            // تحديث لوحة المحاكاة
             if (e.data.type === 'ARABCAPTCHA_DEBUG_SCORE') {
                 document.getElementById('demoScore').textContent = e.data.score;
             }

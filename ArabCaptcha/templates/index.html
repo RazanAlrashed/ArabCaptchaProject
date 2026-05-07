@@ -1,29 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
+  <title>تسجيل الدخول</title>
   <link rel="icon" type="image/png" href="ArabCaptcha.png">
+  <link rel="icon" type="image/png" href="/public/assets/ArabCaptcha.png">
+  <link rel="icon" type="image/png" href="/static/assets/ArabCaptcha.png">
 
   <link rel="stylesheet" href="static/style.css" />
+
 </head>
 
 <body>
   <main class="page">
     <section class="card">
-      <h1 class="title">Login</h1>
+      <h1 class="title">تسجيل الدخول</h1>
 
       <form id="loginForm" class="form" novalidate>
         <label class="field">
-          <span class="label">Email</span>
+          <span class="label">البريد الإلكتروني</span>
           <input id="email" type="email" placeholder="username@gmail.com" required />
           <small class="hint" id="emailHint"></small>
         </label>
 
         <label class="field">
-          <span class="label">Password</span>
+          <span class="label">كلمة المرور</span>
           <div class="password-wrap">
             <input id="password" type="password" placeholder="Password" required />
             <button class="icon-btn" type="button" id="togglePwd" aria-label="Show password">
@@ -37,20 +40,20 @@
         </label>
 
         <div class="row">
-          <a class="link" href="#" onclick="return false;">Forgot Password?</a>
+          <a class="link" href="#" onclick="return false;">نسيت كلمة المرور؟</a>
         </div>
 
         <!-- Inline CAPTCHA Widget -->
         <div id="arabcaptcha"></div>
 
-        <button class="primary" type="submit">Sign in</button>
+        <button class="primary" type="submit">دخول</button>
 
         <!-- Login status message -->
         <div class="login-status" id="loginStatus" role="status" aria-live="polite"></div>
 
         <p class="footer">
-          Don't have an account yet?
-          <a class="link strong" href="#" onclick="return false;">Register for free</a>
+           ليس لديك حساب؟
+          <a class="link strong" href="#" onclick="return false;">سجل الآن</a>
         </p>
       </form>
     </section>

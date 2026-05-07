@@ -80,7 +80,7 @@ async def challenges_page(request: Request, db: Session = Depends(get_db)):
     stats = {
         "total_attempts": db.query(Challenge).count(),
         "passed": db.query(Challenge).filter(Challenge.status == 'passed').count(),
-        "failed": db.query(Challenge).filter(Challenge.status == 'failed').count(),
+        "failed": db.query(Challenge).filter(Challenge.status == 'pending').count(),
         # متوسط درجة البوت (كلما زادت زاد الاشتباه بالنشاط الآلي)
         "avg_bot_score": db.query(func.avg(Challenge.bot_score)).scalar() or 0
     }

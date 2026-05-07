@@ -1,31 +1,42 @@
 :root {
-  --bg: #f2efe9;
-  --card: rgba(255, 255, 255, 0.78);
-  --stroke: rgba(0, 0, 0, 0.08);
-  --text: #2a2a2a;
-  --muted: rgba(0, 0, 0, 0.55);
-  --shadow: 0 24px 60px rgba(0, 0, 0, 0.14);
-  --radius: 18px;
+  --bg: #f8f4ec;
+  --card: rgba(255, 255, 255, 0.72);
+  --stroke: rgba(214, 202, 186, 0.85);
+  --text: #3b2f25;
+  --muted: #6b5f52;
+  --shadow: 0 18px 45px rgba(84, 67, 48, 0.12);
+  --radius: 22px;
   --btn: #6b5f52;
   --btn-hover: #5a5046;
+  --soft: rgba(255,255,255,0.58);
 }
 
 * {
   box-sizing: border-box;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+
 }
 
 html,
 body {
   height: 100%;
+  direction: rtl;
+  text-align: right;
 }
 
 body {
   margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  background: var(--bg);
+  background:
+    linear-gradient(rgba(120, 105, 88, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 105, 88, 0.045) 1px, transparent 1px),
+    radial-gradient(circle at top right, rgba(107, 95, 82, 0.18), transparent 38%),
+    linear-gradient(135deg, #F8F4EC 0%, #EFE5D6 100%);
+  background-size: 32px 32px, 32px 32px, auto, auto;
   color: var(--text);
 }
 
+/* نفس تمركز صفحة التسجيل */
 .page {
   min-height: 100vh;
   display: grid;
@@ -33,9 +44,10 @@ body {
   padding: 24px;
 }
 
+/* نفس بوكسات Dashboard / Monitoring */
 .card {
   width: min(420px, 92vw);
-  padding: 28px 26px 18px;
+  padding: 34px 30px 22px;
   border-radius: var(--radius);
   direction: ltr;
   background: var(--card);
@@ -43,36 +55,53 @@ body {
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(14px);
+}
+
+/* الزاوية العلوية مثل بوكسات Dashboard */
+.card::after {
+  content: "";
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  width: 72px;
+  height: 72px;
+  background: rgba(214, 202, 186, 0.45);
+  border-radius: 0 0 0 30px;
+  z-index: 0;
 }
 
 .card::before {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("assets/Picture1.png");
-  background-repeat: no-repeat;
+
+  background-image: url("../assets/Picture1.png");
+  background-repeat:no-repeat;
   background-position: center 66%;
   background-size: 120%;
   filter: blur(8px);
   opacity: 0.;
-  z-index: 0;
+  z-index:0;
 }
 
-.card>* {
+.card > * {
   position: relative;
   z-index: 1;
 }
 
 .title {
-  margin: 0 0 18px;
+  margin: 0 0 22px;
   font-size: 34px;
+  font-weight: 700;
   letter-spacing: -0.6px;
+  color: #2f2923;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .field {
@@ -84,19 +113,21 @@ body {
 .label {
   font-size: 12px;
   color: var(--muted);
+  font-weight: 500;
 }
 
 input {
-  height: 42px;
-  padding: 0 12px;
-  border-radius: 10px;
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
   border: 1px solid var(--stroke);
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.82);
   outline: none;
+  color: var(--text);
 }
 
 input:focus {
-  border-color: rgba(107, 95, 82, 0.35);
+  border-color: rgba(107, 95, 82, 0.45);
   box-shadow: 0 0 0 4px rgba(107, 95, 82, 0.12);
 }
 
@@ -105,10 +136,15 @@ input:focus {
   display: flex;
   align-items: center;
 }
-
+.password-wrap .icon-btn {
+  position: absolute;
+  left: 10px; /* غيّرها من right إلى left */
+  right: auto;
+}
 .password-wrap input {
   width: 100%;
-  padding-right: 44px;
+  padding-right: 10px;
+  padding-left: 40px; /* أضف هذا لتوفير مساحة للزر على اليسار */
 }
 
 .icon-btn {
@@ -116,31 +152,31 @@ input:focus {
   right: 10px;
   border: none;
   background: transparent;
-  color: rgba(0, 0, 0, 0.55);
+  color: rgba(59, 47, 37, 0.58);
   cursor: pointer;
   padding: 6px;
   border-radius: 10px;
 }
 
 .icon-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(107, 95, 82, 0.08);
 }
 
 .hint {
   min-height: 14px;
   font-size: 12px;
-  color: #b03a2e;
+  color: #991b1b;
 }
 
 .row {
   display: flex;
   justify-content: flex-end;
-  margin-top: -6px;
+  margin-top: -4px;
 }
 
 .link {
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.65);
+  color: rgba(59, 47, 37, 0.72);
   text-decoration: none;
 }
 
@@ -149,31 +185,35 @@ input:focus {
 }
 
 .link.strong {
-  font-weight: 600;
+  font-weight: 700;
 }
 
+/* زر بنفس لون الهوية */
 .primary {
-  height: 44px;
+  height: 46px;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--btn);
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 10px 24px rgba(84, 67, 48, 0.18);
 }
 
 .primary:hover {
   background: var(--btn-hover);
 }
 
+/* كابتشا كبوكس متناسق */
 .captcha {
-  border-radius: 14px;
+  border-radius: 18px;
   border: 1px solid var(--stroke);
-  background: rgba(255, 255, 255, 0.78);
-  padding: 12px;
+  background: rgba(255, 255, 255, 0.70);
+  padding: 14px;
+  box-shadow: 0 12px 28px rgba(84, 67, 48, 0.10);
+  backdrop-filter: blur(10px);
 }
 
-/* pages inside captcha */
 .cap-page {
   transition: opacity .2s ease;
 }
@@ -182,37 +222,34 @@ input:focus {
   display: none;
 }
 
-/* PAGE 1 */
 .cap-line {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 6px 4px;
+  gap: 14px;
+  padding: 8px 4px;
 }
 
 .cap-text {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.70);
+  font-size: 13px;
+  color: rgba(59, 47, 37, 0.82);
+  font-weight: 500;
 }
 
-
 .cap-circle {
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border-radius: 999px;
-  border: 2px solid rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba(0,0,0,0.25);
   background-color: rgba(255, 255, 255, 0.95);
   cursor: pointer;
   position: relative;
   overflow: hidden;
-
   background-image: url("assets/Picture1.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 70%;
 }
-
 
 .cap-circle::after {
   content: "";
@@ -228,12 +265,10 @@ input:focus {
   opacity: 1;
 }
 
-/* PAGE 2  */
 .cap-head {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  /* words start from the left */
   gap: 12px;
   margin-bottom: 6px;
 }
@@ -242,44 +277,30 @@ input:focus {
   display: flex;
   gap: 10px;
   margin-bottom: 8px;
+  padding-left: 4px;
+  justify-content: flex-start;
+  direction: rtl;
 }
 
 .cap-word {
   font-size: 20px;
   font-weight: 700;
   padding: 8px 12px;
-  border-radius: 12px;
-  background: rgba(242, 239, 233, 0.75);
-  border: 1px dashed rgba(0, 0, 0, 0.15);
+  border-radius: 14px;
+  background: rgba(248, 244, 236, 0.85);
+  border: 1px dashed rgba(107, 95, 82, 0.32);
   white-space: nowrap;
-  justify-content: flex-start;
-  /* align to the left */
-  align-items: center;
-
   direction: rtl;
-  /* Arabic text direction */
-}
-
-.cap-words {
-  padding-left: 4px;
-}
-
-.cap-words {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-start;
-  direction: rtl;
-  /* change layout to RTL for Arabic */
+  color: #3b2f25;
 }
 
 .cap-page-2 {
   margin-top: 8px;
 }
 
-
 .cap-sub {
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.55);
+  color: rgba(59, 47, 37, 0.62);
   margin-bottom: 10px;
 }
 
@@ -291,33 +312,32 @@ input:focus {
 .secondary {
   height: 42px;
   padding: 0 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(107, 95, 82, 0.25);
-  background: rgba(255, 255, 255, 0.75);
-  color: rgba(0, 0, 0, 0.75);
+  border-radius: 14px;
+  border: 1px solid rgba(107, 95, 82, 0.28);
+  background: rgba(255, 255, 255, 0.78);
+  color: rgba(59, 47, 37, 0.82);
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .secondary:hover {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .cap-status {
   margin-top: 8px;
   font-size: 12px;
   min-height: 16px;
-  color: rgba(0, 0, 0, 0.65);
+  color: rgba(59, 47, 37, 0.72);
 }
 
 .footer {
-  margin: 6px 0 0;
+  margin: 10px 0 0;
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.65);
+  color: rgba(59, 47, 37, 0.70);
   text-align: center;
 }
 
-/* Login status message */
 .login-status {
   margin-top: 4px;
   font-size: 12px;
@@ -325,7 +345,7 @@ input:focus {
   text-align: center;
 }
 
-/* ── Modal Overlay ───────────────────────────────────────────────────── */
+/* Modal بنفس الستايل */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -333,9 +353,9 @@ input:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(59, 47, 37, 0.35);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   animation: fadeIn 0.2s ease;
 }
 
@@ -344,23 +364,19 @@ input:focus {
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
   position: relative;
   width: min(400px, 90vw);
-  padding: 22px 20px 16px;
+  padding: 24px 22px 18px;
   border-radius: var(--radius);
   background: var(--card);
   border: 1px solid var(--stroke);
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 32px 80px rgba(84, 67, 48, 0.25);
+  backdrop-filter: blur(14px);
   animation: slideUp 0.25s ease;
 }
 
@@ -383,7 +399,7 @@ input:focus {
   border: none;
   background: transparent;
   font-size: 22px;
-  color: rgba(0, 0, 0, 0.45);
+  color: rgba(59, 47, 37, 0.50);
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 8px;
@@ -391,11 +407,10 @@ input:focus {
 }
 
 .modal-close:hover {
-  background: rgba(0, 0, 0, 0.06);
-  color: rgba(0, 0, 0, 0.75);
+  background: rgba(107, 95, 82, 0.10);
+  color: rgba(59, 47, 37, 0.85);
 }
 
-/* Fix refresh button position inside modal (not absolute) */
 .refresh-icon-btn {
   position: relative;
   right: auto;
