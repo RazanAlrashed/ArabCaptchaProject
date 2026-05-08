@@ -309,8 +309,9 @@ observer.observe(document.body, { childList: true, subtree: true, attributes: tr
 
 window.addEventListener("load", notifyParentHeight);
 */
-const BACKEND_BASE_URL = "http://127.0.0.1:8000/api";
-const BASE_ORIGIN      = "http://127.0.0.1:8000";
+const currentOrigin = window.location.origin;
+const BACKEND_BASE_URL = "${currentOrigin}/api";
+const BASE_ORIGIN      = "${currentOrigin}";
 
 let sessionId          = null;
 let challengeId        = null;
