@@ -6,14 +6,15 @@ window.ArabCaptcha = {
       console.error("ArabCaptcha container not found");
       return;
     }
+    const currentOrigin = window.location.origin;
 
     const params = new URLSearchParams({
-      domain: "http://localhost",
+      domain: currentOrigin,
       apiKey: options.apiKey || "demo_secret_key"
     });
 
     const iframe = document.createElement("iframe");
-    iframe.src = `http://127.0.0.1:8000/public/widget.html?${params.toString()}`;
+    iframe.src = `${currentOrigin}/public/widget.html?${params.toString()}`;
     iframe.width = "100%";
     iframe.height = "56";
     iframe.style.border = "0";
