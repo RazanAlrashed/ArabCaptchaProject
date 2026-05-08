@@ -32,13 +32,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-os.makedirs("assets/captcha", exist_ok=True)
-# 3. إعداد الملفات الساكنة والقوالب (Templates)
-# تأكدي من وجود مجلدات assets و templates في المجلد الرئيسي
-app.mount("/assets", StaticFiles(directory="assets"), name="assets")
-app.mount("/public", StaticFiles(directory="public"), name="public")
-app.mount("/static", StaticFiles(directory="static"), name="static")
-#app.mount("/templates", StaticFiles(directory="templates"), name="templates")
+# الحصول على المسار المطلق للمجلد الذي يحتوي على ملف main.py حالياً
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# دالة مساعدة للتأكد من وجود المجلد قبل عمل mount لتجنب الأخطاء
+def safe_mount(path_name, route):
+    full_path = os.path.join(BASE_DIR, path_name)
+    if os.path.exists(full_path):
+        app.mount(route, StaticFiles(directory=full_path), name=path_name)
+        print(f"✅ Mounted {path_name} from {full_path}")
+    else:
+        # إنشاء المجلد إذا لم يكن موجوداً (مفيد لصور الكابتشا الجديدة)
+        os.makedirs(full_path, exist_ok=True)
+        app.mount(route, StaticFiles(directory=full_path), name=path_name)
+        print(f"📁 Created and mounted {path_name}")
+
+# إعداد المجلدات
+safe_mount("assets", "/assets")
+safe_mount("public", "/public")
+safe_mount("static", "/static")
 
 templates = Jinja2Templates(directory="templates")
 
