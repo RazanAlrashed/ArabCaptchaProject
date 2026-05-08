@@ -13,5 +13,5 @@ fitz
 paddlepaddle==2.6.2
 paddleocr
 opencv-python
-
+psycopg2-binary
 #uvicorn main:app --reload
