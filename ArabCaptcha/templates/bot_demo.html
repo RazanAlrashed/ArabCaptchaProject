@@ -303,7 +303,7 @@
                     نظام التحقق المباشر
                 </div>
                 <div class="widget-container">
-                    <iframe id="captchaFrame" scrolling="no" allowtransparency="true" src="/public/widget.html"></iframe>
+                    <iframe id="captchaFrame" scrolling="no" allowtransparency="true" src="/public/bot_widget.html"></iframe>
                 </div>
             </div>
         </div>
@@ -364,42 +364,62 @@
     </footer>
 
     <script>
-        function copyCode() {
-            const code = document.getElementById('integrationCode').textContent;
-            navigator.clipboard.writeText(code);
-            const btn = document.querySelector('.btn-copy');
-            btn.textContent = 'تم النسخ!';
-            setTimeout(() => btn.textContent = 'نسخ الكود', 2000);
+    function copyCode() {
+        const code = document.getElementById('integrationCode').textContent;
+        navigator.clipboard.writeText(code);
+        const btn = document.querySelector('.btn-copy');
+        btn.textContent = 'تم النسخ!';
+        setTimeout(() => btn.textContent = 'نسخ الكود', 2000);
+    }
+    
+    const frame = document.getElementById('captchaFrame');
+    // متغير لحفظ القيمة المختارة ومنع التذبذب
+    let currentForcedScore = 0;
+
+    window.addEventListener('message', (e) => {
+        if (!e.data) return;
+        
+        if (e.data.type === 'ARABCAPTCHA_RESIZE' && e.data.height) {
+            frame.style.height = (e.data.height + 20) + 'px'; 
         }
         
-        const frame = document.getElementById('captchaFrame');
+        // 1. عند استقبال تغيير الحالة أو المستوى
+        if (e.data.type === 'ARABCAPTCHA_DEBUG_DIFF') {
+            const diffEl = document.getElementById('demoDiff');
+            const scoreEl = document.getElementById('demoScore');
+            let text = e.data.diffText;
 
-        window.addEventListener('message', (e) => {
-            if (!e.data) return;
-            
-            if (e.data.type === 'ARABCAPTCHA_RESIZE' && e.data.height) {
-                frame.style.height = (e.data.height + 20) + 'px'; 
+            if (text.includes('easy') || text.includes('طبيعي') || text.includes('آمـن')) {
+                text = 'آمـن';
+                currentForcedScore = 10;
+            } else if (text.includes('medium') || text.includes('متوسط') || text.includes('مريب')) {
+                text = 'مريب';
+                currentForcedScore = 50;
+            } else if (text.includes('hard') || text.includes('خطورة') || text.includes('نشاط آلي')) {
+                text = 'نشاط آلي';
+                currentForcedScore = 80;
             }
             
-            if (e.data.type === 'ARABCAPTCHA_DEBUG_SCORE') {
-                document.getElementById('demoScore').textContent = e.data.score;
-            }
-            
-            if (e.data.type === 'ARABCAPTCHA_DEBUG_DIFF') {
-                const diffEl = document.getElementById('demoDiff');
-                let text = e.data.diffText;
-                if (text.includes('طبيعي')) text = 'آمـن';
-                if (text.includes('متوسط')) text = 'مريب';
-                if (text.includes('خطورة')) text = 'نشاط آلي';
-                
-                diffEl.textContent = text;
-                diffEl.style.color = e.data.color;
-            }
-        });
-
-        function simulateInWidget(level) {
-            frame.contentWindow.postMessage({ type: 'SIMULATE_BEHAVIOR', level: level }, '*');
+            diffEl.textContent = text;
+            diffEl.style.color = e.data.color;
+            scoreEl.textContent = currentForcedScore; // التحديث الفوري
         }
+
+        // 2. عند استقبال السكور من الباكاند (نمنعه من تغيير الرقم ونضع رقمنا الثابت)
+        if (e.data.type === 'ARABCAPTCHA_DEBUG_SCORE') {
+            document.getElementById('demoScore').textContent = currentForcedScore;
+        }
+    });
+
+    function simulateInWidget(level) {
+        // بمجرد الضغط على الزر نجهز الرقم مسبقاً
+        if(level === 'easy') currentForcedScore = 10;
+        if(level === 'medium') currentForcedScore = 50;
+        if(level === 'hard') currentForcedScore = 80;
+        
+        document.getElementById('demoScore').textContent = currentForcedScore;
+        frame.contentWindow.postMessage({ type: 'SIMULATE_BEHAVIOR', level: level }, '*');
+    }
     </script>
 </body>
 </html>

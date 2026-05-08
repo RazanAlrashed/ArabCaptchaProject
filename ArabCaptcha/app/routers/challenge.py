@@ -116,7 +116,8 @@ def request_challenge(payload: ChallengeCreate, db: Session = Depends(get_db)):
     Returns ONE composite image (ref + low-conf stitched together, distorted
     according to the session's bot score).
     """
-    challenge = create_challenge(session_id=payload.session_id, db=db)
+    
+    challenge = create_challenge(session_id=payload.session_id, db=db ,forced_difficulty=payload.difficulty)
     return _build_response(challenge, db)
 
 

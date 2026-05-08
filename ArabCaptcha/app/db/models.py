@@ -65,7 +65,7 @@ class SiteSession(Base):
     """
     __tablename__ = "site_session"
 
-    session_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    session_id: Mapped[str] = mapped_column(String(50), primary_key=True, default=lambda: str(uuid.uuid4()))
     site_id: Mapped[int] = mapped_column(ForeignKey("client_site.site_id"), nullable=False)
     session_created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     bot_score_initial: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -73,7 +73,8 @@ class SiteSession(Base):
     # risk_level: "low" | "med" | "high"
     risk_level: Mapped[str | None] = mapped_column(String(10), nullable=True)
     # status: "active" | "completed" | "expired"
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="active")
+    status: Mapped[str] = mapped_column(String(35), nullable=False, default="active")
+    needs_challenge: Mapped[bool] = mapped_column(Boolean, default=True)
 
     # Relationships
     site: Mapped["ClientSite"] = relationship("ClientSite", back_populates="sessions")
@@ -147,7 +148,7 @@ class LowConfidenceWord(Base):
     word_id: Mapped[int] = mapped_column(ForeignKey("word.word_id"), primary_key=True)
     initial_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     # status: "pending" | "verified" | "unreadable"
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")
+    status: Mapped[str] = mapped_column(String(35), nullable=False, default="pending")
     verified_text: Mapped[str | None] = mapped_column(String(255), nullable=True)
     verified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     total_votes: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
@@ -175,18 +176,18 @@ class Challenge(Base):
     """
     __tablename__ = "challenge"
 
-    challenge_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    challenge_id: Mapped[str] = mapped_column(String(50), primary_key=True, default=lambda: str(uuid.uuid4()))
     session_id: Mapped[str] = mapped_column(ForeignKey("site_session.session_id"), nullable=False)
     ref_word_id: Mapped[int] = mapped_column(ForeignKey("reference_word.word_id"), nullable=False)
     low_conf_word_id: Mapped[int] = mapped_column(ForeignKey("low_confidence_word.word_id"), nullable=False)
     bot_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     # difficulty: "easy" | "medium" | "hard"
-    difficulty: Mapped[str] = mapped_column(String(10), nullable=False, default="easy")
+    difficulty: Mapped[str] = mapped_column(String(35), nullable=False, default="easy")
     max_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=3)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     # status: "pending" | "passed" | "failed" | "expired"
-    status: Mapped[str] = mapped_column(String(10), nullable=False, default="pending")
+    status: Mapped[str] = mapped_column(String(35), nullable=False, default="pending")
     is_human_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     composite_image_url: Mapped[str | None] = mapped_column(String, nullable=True)
     ref_end_x: Mapped[int | None] = mapped_column(Integer, nullable=True, default=-1)

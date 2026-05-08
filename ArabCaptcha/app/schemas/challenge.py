@@ -5,11 +5,12 @@ Pydantic models for challenge-related API requests and responses.
 """
 from datetime import datetime
 from pydantic import BaseModel, Field
-
+from typing import Optional
 
 class ChallengeCreate(BaseModel):
     """POST /challenges — request a new CAPTCHA challenge."""
     session_id: str = Field(..., description="Active session ID")
+    difficulty: Optional[str] = None
 
 
 class ChallengeResponse(BaseModel):

@@ -305,7 +305,7 @@ except ImportError:
 
 _CAPTCHA_DIR = Path("assets") / "captcha"
 
-def create_challenge(session_id: str, db: Session) -> Challenge:
+def create_challenge(session_id: str, db: Session , forced_difficulty: str = None) -> Challenge:
     """
     1. Verify session is active.
     2. Pick random active reference and pending low-confidence words.
@@ -341,8 +341,16 @@ def create_challenge(session_id: str, db: Session) -> Challenge:
         raise HTTPException(status_code=503, detail="No low-confidence words available")
 
     # ── Determine difficulty ──────────────────────────────────────
-    bot_score = site_session.bot_score_initial or 0.5
-    difficulty = determine_difficulty(bot_score)
+    #bot_score = site_session.bot_score_initial or 0.5
+    #difficulty = determine_difficulty(bot_score)
+    if forced_difficulty in ["easy", "medium", "hard"]:
+        difficulty = forced_difficulty
+        # ضبط درجة بوت وهمية لتتوافق مع التشويه
+        bot_score = 0.1 if difficulty == "easy" else (0.5 if difficulty == "medium" else 0.9)
+    else:
+        # المنطق التلقائي المعتمد على السلوك
+        bot_score = site_session.bot_score_initial or 0.0
+        difficulty = determine_difficulty(bot_score)
 
     # ── Get word image paths ──────────────────────────────────────
     ref_word_base = db.query(Word).filter(Word.word_id == ref_word.word_id).first()
