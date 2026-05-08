@@ -37,7 +37,6 @@ os.makedirs("assets/captcha", exist_ok=True)
 # تأكدي من وجود مجلدات assets و templates في المجلد الرئيسي
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 app.mount("/public", StaticFiles(directory="public"), name="public")
-app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 #app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 
