@@ -310,8 +310,8 @@ observer.observe(document.body, { childList: true, subtree: true, attributes: tr
 window.addEventListener("load", notifyParentHeight);
 */
 const currentOrigin = window.location.origin;
-const BACKEND_BASE_URL = '${currentOrigin}/api';
-const BASE_ORIGIN      = '${currentOrigin}';
+const BACKEND_BASE_URL = `${currentOrigin}/api`;
+const BASE_ORIGIN      = `${currentOrigin}`;
 
 let sessionId          = null;
 let challengeId        = null;
