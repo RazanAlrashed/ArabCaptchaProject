@@ -141,7 +141,7 @@ function getHostDomain() {
   return new URLSearchParams(window.location.search).get("domain") || "https://arabcaptchaproject.onrender.com";
 }
 function getApiKey() {
-  return new URLSearchParams(window.location.search).get("apiKey") || "mypassword1";
+  return "mypassword1";
 }
 
 function fullUrl(path) {
