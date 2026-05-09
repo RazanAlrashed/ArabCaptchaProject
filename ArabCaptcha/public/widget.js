@@ -449,10 +449,10 @@ function notifyParentHeight() {
 }
 
 function getHostDomain() {
-  return new URLSearchParams(window.location.search).get("domain") || "http://localhost";
+  return new URLSearchParams(window.location.search).get("domain") || "https://arabcaptchaproject.onrender.com";
 }
 function getApiKey() {
-  return new URLSearchParams(window.location.search).get("apiKey") || "demo_secret_key";
+  return new URLSearchParams(window.location.search).get("apiKey") || "mypassword1";
 }
 
 function fullUrl(path) {
