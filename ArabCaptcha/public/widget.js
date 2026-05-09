@@ -1,4 +1,3 @@
-
 const currentOrigin = window.location.origin;
 const BACKEND_BASE_URL = `${currentOrigin}/api`;
 const BASE_ORIGIN      = `${currentOrigin}`;
@@ -199,6 +198,7 @@ async function createSession() {
 // ─────────────────────────────────────────────────────────────
 // CHALLENGE
 // ─────────────────────────────────────────────────────────────
+/*
 async function loadChallenge(keepStatus = false) {
   if (!keepStatus) {
     captchaStatus.textContent = "جاري التحميل...";
@@ -239,7 +239,69 @@ async function loadChallenge(keepStatus = false) {
   if (!keepStatus) captchaStatus.textContent = "";
   notifyParentHeight();
 }
+*/
+// 1. تحديث وظيفة تحميل التحدي لتقبل مستوى صعوبة اختياري
+async function loadChallenge(keepStatus = false, forcedDifficulty = null) {
+  if (!keepStatus) {
+    captchaStatus.textContent = "جاري التحميل...";
+    captchaStatus.style.color = "rgba(0,0,0,0.65)";
+  }
 
+  refAnswerInput.value = "";
+  lowConfAnswerInput.value = "";
+  verifiedToken = null;
+
+  // إعداد بيانات الطلب
+  const requestBody = { session_id: sessionId };
+  
+  // إذا تم تحديد مستوى صعوبة (من المحاكي)، نرسله للـ API
+  if (forcedDifficulty) {
+    requestBody.difficulty = forcedDifficulty; 
+  }
+
+  const response = await fetch(`${BACKEND_BASE_URL}/challenges`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(requestBody)
+  });
+
+  if (!response.ok) throw new Error("Challenge request failed");
+
+  const data = await response.json();
+  challengeId = data.challenge_id;
+  currentDifficulty = data.difficulty || "easy";
+
+  const imgUrl = data.composite_image_url || data.ref_image_url;
+  if (compositeImage) {
+    compositeImage.src = fullUrl(imgUrl);
+    _applyDifficultyStyle(currentDifficulty);
+  }
+
+  challengeStartedAt = performance.now();
+  if (!keepStatus) captchaStatus.textContent = "";
+  notifyParentHeight();
+}
+
+// 2. إضافة مستمع للرسائل القادمة من الصفحة الأب (bot_demo)
+window.addEventListener("message", async (event) => {
+  if (event.data.type === 'SIMULATE_BEHAVIOR') {
+    const level = event.data.level; // 'easy', 'medium', 'hard'
+    
+    // الانتقال لصفحة التحدي فوراً
+    capPage1.classList.add("hidden");
+    capPage2.classList.remove("hidden");
+    
+    try {
+      // التأكد من وجود جلسة أولاً
+      if (!sessionId) await createSession();
+      
+      // طلب تحدي بصعوبة محددة
+      await loadChallenge(false, level);
+    } catch (err) {
+      console.error("Simulation Error:", err);
+    }
+  }
+});
 // ─────────────────────────────────────────────────────────────
 // ESCALATION — reload challenge at harder difficulty
 // Called when server returns needs_upgrade: true
@@ -441,6 +503,31 @@ verifyBtn.addEventListener("click", async (e) => {
       captchaStatus.textContent = "❌ خطأ في الاتصال. حاول مرة أخرى.";
       captchaStatus.style.color = "#b03a2e";
       verifyBtn.disabled = false;
+    }
+  }
+});
+
+window.addEventListener("message", async (event) => {
+  // الاستماع للرسائل القادمة من صفحة bot_demo.html
+  if (event.data.type === 'SIMULATE_BEHAVIOR') {
+    if (isLockedOut) return;
+    //const level = event.data.level; // 'easy', 'medium', 'hard'
+    
+    // الانتقال لصفحة التحدي فوراً
+    document.getElementById("capPage1").classList.add("hidden");
+    document.getElementById("capPage2").classList.remove("hidden");
+    
+    try {
+      // 3. إذا لم تكن هناك جلسة، أنشئ واحدة ولكن لا تطلب تحدي تلقائي
+      if (!sessionId) {
+        await createSession(); 
+      }
+      
+      // 4. اطلب التحدي بالمستوى المطلوب "فقط"
+      await loadChallenge(false, event.data.level);
+      
+    } catch (err) {
+      console.error("Simulation failed:", err);
     }
   }
 });
