@@ -10,7 +10,7 @@ window.ArabCaptcha = {
 
     const params = new URLSearchParams({
       domain: currentOrigin,
-      apiKey: options.apiKey || "demo_secret_key"
+      apiKey: options.apiKey || "mypassword1"
     });
 
     const iframe = document.createElement("iframe");
