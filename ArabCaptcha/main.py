@@ -67,7 +67,7 @@ app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 @app.get("/", include_in_schema=False)
 async def admin_portal(request: Request):
     # هذه هي الصفحة التي ستفتح فور تشغيل السيرفر
-    return templates.TemplateResponse("admin.html", {"request": request})
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/dashboard", include_in_schema=False)
 async def dashboard_page(request: Request, db: Session = Depends(get_db)):
